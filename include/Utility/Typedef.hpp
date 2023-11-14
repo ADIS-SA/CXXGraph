@@ -26,6 +26,7 @@
 #include <map>
 #include <memory>
 #include <string>
+#include <vector>
 
 #include "ConstValue.hpp"
 #include "PointerHash.hpp"
@@ -79,6 +80,7 @@ struct DijkstraResult_struct {
       false;  // TRUE if the function does not return error, FALSE otherwise
   std::string errorMessage = "";  // message of error
   double result = INF_DOUBLE;     // result (valid only if success is TRUE)
+  std::vector<std::string> path;
 };
 typedef DijkstraResult_struct DijkstraResult;
 

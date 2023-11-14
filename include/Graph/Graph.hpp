@@ -40,6 +40,7 @@
 #include <optional>
 #include <queue>
 #include <set>
+#include <sstream>
 #include <stack>
 #include <string>
 #include <thread>
@@ -1480,6 +1481,9 @@ const DijkstraResult Graph<T>::dijkstra(const Node<T> &source,
   // marking the distance of source as 0
   dist[*source_node_it] = 0;
 
+  std::unordered_map<std::string, std::string> parent;
+  parent[source.getUserId()] = "";
+
   while (!pq.empty()) {
     // second element of pair denotes the node / vertex
     shared<const Node<T>> currentNode = pq.top().second;
@@ -1507,6 +1511,8 @@ const DijkstraResult Graph<T>::dijkstra(const Node<T> &source,
             } else if (currentDist + dw_edge->getWeight() < dist[elem.first]) {
               dist[elem.first] = currentDist + dw_edge->getWeight();
               pq.push(std::make_pair(dist[elem.first], elem.first));
+              parent[elem.first.get()->getUserId()] =
+                  currentNode.get()->getUserId();
             }
           } else if (elem.second->isDirected().has_value() &&
                      !elem.second->isDirected().value()) {
@@ -1519,6 +1525,8 @@ const DijkstraResult Graph<T>::dijkstra(const Node<T> &source,
             } else if (currentDist + udw_edge->getWeight() < dist[elem.first]) {
               dist[elem.first] = currentDist + udw_edge->getWeight();
               pq.push(std::make_pair(dist[elem.first], elem.first));
+              parent[elem.first.get()->getUserId()] =
+                  currentNode.get()->getUserId();
             }
           } else {
             // ERROR it shouldn't never returned ( does not exist a Node
@@ -1538,6 +1546,13 @@ const DijkstraResult Graph<T>::dijkstra(const Node<T> &source,
     result.success = true;
     result.errorMessage = "";
     result.result = dist[*target_node_it];
+    std::string id = target.getUserId();
+    while (parent[id] != "") {
+      result.path.push_back(id);
+      id = parent[id];
+    }
+    result.path.push_back(source.getUserId());
+    std::reverse(result.path.begin(), result.path.end());
     return result;
   }
   result.errorMessage = ERR_TARGET_NODE_NOT_REACHABLE;
